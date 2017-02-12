@@ -8,13 +8,13 @@ Created on Sat Feb 11 18:28:08 2017
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-import getpass
-from selenium.webdriver.common.by import By
 import glob
 import shutil
 from os.path import expanduser
 import time
-
+from selenium_utils import send_user_input
+from selenium_utils import click_xpath
+from selenium_utils import click_all_xpaths
 
 #%% OPEN LOGIN
 
@@ -31,36 +31,35 @@ assert "Sign in" in driver.title
 
 #%% DO LOGIN
 
-username = input('Username: ')
 elem = driver.find_element_by_name("Email")
-elem.clear()
-elem.send_keys(username)
+send_user_input(element=elem, prompt='Username: ')
 elem.send_keys(Keys.RETURN)
 
-password = getpass.getpass('Password:')
+# waiting
+while True:
+    if len(driver.find_elements_by_name("Passwd")) > 0: 
+        break
+    time.sleep(1)
+
 elem = driver.find_element_by_name("Passwd")
-elem.clear()
-elem.send_keys(password)
+send_user_input(element=elem, prompt='Password: ')
 elem.send_keys(Keys.RETURN)
 
 
 #%% ACCESS 'TAKEOUT LIGHT'
 
+assert "My Account" in driver.title
+
 driver.get('https://takeout.google.com/settings/takeout/light')
 
 # uncheck all boxes
-elems = driver.find_elements(By.XPATH, "//input[@class='gr']");
-for elem in elems:
-    elem.click()
+click_all_xpaths(driver, "//input[@class='gr']")
     
 # check 'fit' box
-elems = driver.find_elements(By.XPATH, 
-  "//input[contains(@class, 'gr') and contains(@value, 'fit')]")
-elems[0].click()
+click_xpath(driver, 
+            "//input[contains(@class, 'gr') and contains(@value, 'fit')]")
 
-elems = driver.find_elements(By.XPATH, 
-  "//input[contains(@class, 'Moa gr')]")
-elems[0].click()
+click_xpath(driver, "//input[contains(@class, 'Moa gr')]")
 
 
 #%% DOWNLOAD LATEST ARCHIVE
@@ -70,18 +69,17 @@ time.sleep(20)
 
 print('Downloading archive...')
 driver.get('https://takeout.google.com/settings/takeout/light')
-elem = driver.find_element(By.XPATH, "//a[contains(., 'Download')]")
-elem.click()
+click_xpath(driver, "//a[contains(., 'Download')]")
 
 if 'Sign in' in driver.title:
     print('Re-entering your password...')
-    elem.send_keys(password)
+    elem = driver.find_element_by_name("Passwd")
+    send_user_input(element=elem, prompt='Password: ')
     elem.send_keys(Keys.RETURN)
 
     print('Downloading file...') 
     driver.get('https://takeout.google.com/settings/takeout/light')
-    elem = driver.find_element(By.XPATH, "//a[contains(., 'Download')]")
-    elem.click()
+    click_xpath(driver, "//a[contains(., 'Download')]")    
     
 print('Waiting 5s for download to finish...')
 time.sleep(5)
@@ -101,6 +99,6 @@ for file in glob.glob(r''+ source_dir +'takeout-*.zip'):
 #%% LOGOUT AND CLOSE DRIVER
 
 print('Done. Logging out.')
-driver.find_element(By.XPATH, '//span[@class="gb_9a gbii"]').click()
-driver.find_element(By.XPATH, '//a[@id="gb_71"]').click()
+click_xpath(driver, '//span[@class="gb_9a gbii"]')
+click_xpath(driver, '//a[@id="gb_71"]')
 driver.close()
