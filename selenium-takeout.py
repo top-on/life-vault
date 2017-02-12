@@ -65,40 +65,42 @@ elems[0].click()
 
 #%% DOWNLOAD LATEST ARCHIVE
 
-time.sleep(10)  # wait for archive to be prepared
+print('Waiting 20s for archive to be prepared...')
+time.sleep(20)
 
-# download latest file
+print('Downloading archive...')
 driver.get('https://takeout.google.com/settings/takeout/light')
 elem = driver.find_element(By.XPATH, "//a[contains(., 'Download')]")
 elem.click()
 
 if 'Sign in' in driver.title:
-    print('Webpage requests you to re-enter your password.')
-    password = getpass.getpass('Password:')
-    elem = driver.find_element_by_name("Passwd")
-    elem.clear()
+    print('Re-entering your password...')
     elem.send_keys(password)
     elem.send_keys(Keys.RETURN)
 
-    # repeat download    
+    print('Downloading file...') 
     driver.get('https://takeout.google.com/settings/takeout/light')
     elem = driver.find_element(By.XPATH, "//a[contains(., 'Download')]")
     elem.click()
+    
+print('Waiting 5s for download to finish...')
+time.sleep(5)
 
 
 #%% MOVE DOWNLOADED FILE TO ~/backup/fit/.
 
 home = expanduser("~")
+source_dir = home + '/Downloads/'
 dest_dir = home + "/backup/takeout/raw"
 
-for file in glob.glob(r'' + home + '/Downloads/takeout-*.zip'):
-    print('Moving takeout file to backup folder: ' + file)                                                                                                                                        
+for file in glob.glob(r''+ source_dir +'takeout-*.zip'):
+    print('Moving takeout file '+ file +' to backup folder: '+ dest_dir)                                                                                                                                        
     shutil.move(file, dest_dir)
 
 
 #%% LOGOUT AND CLOSE DRIVER
 
+print('Done. Logging out.')
 driver.find_element(By.XPATH, '//span[@class="gb_9a gbii"]').click()
 driver.find_element(By.XPATH, '//a[@id="gb_71"]').click()
-
 driver.close()
