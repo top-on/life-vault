@@ -1,0 +1,9 @@
+name: life-vault
+channels:
+  - default
+dependencies:
+  - python==3.6
+  - flake8
+  - pandas
+  - pip:
+    - pydrive
