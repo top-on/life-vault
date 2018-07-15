@@ -5,5 +5,6 @@ data/processed/*
 # google drive
 client_secrets.json
 
-# data
+# data and results
 data/
+results/
