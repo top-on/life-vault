@@ -1,0 +1,12 @@
+version: '2'
+services:
+
+    rstudio:
+      image: rocker/tidyverse:latest
+      container_name: life-vault-rstudio
+      environment:
+        - PASSWORD=pw
+      volumes:
+        - .:/home/rstudio/life-vault
+      ports:
+        - "8787:8787"
