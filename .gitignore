@@ -8,3 +8,5 @@ client_secrets.json
 # data and results
 data/
 results/
+.Rproj.user
+*.Rproj
