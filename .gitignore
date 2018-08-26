@@ -1,12 +1,11 @@
 src/*/__pycache__
 data/raw/*
 data/processed/*
-
 # google drive
 client_secrets.json
-
 # data and results
 data/
 results/
 .Rproj.user
 *.Rproj
+.httr-oauth
