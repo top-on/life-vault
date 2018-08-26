@@ -6,6 +6,7 @@ library(RSQLite)
 library(lubridate)
 library(ggplot2)
 
+
 # LOAD FROM DATABASE ----
 con <- dbConnect(dbDriver("SQLite"), dbname = "data/xiaomi.sqlite")
 
@@ -17,12 +18,14 @@ activity <-
 
 dbDisconnect(con)
 
+
 # PREPROCESS ----
 # clean data fields
 activity_clean <-
   activity %>%
   # timestamp to datetime
   mutate(datetime = as.POSIXct(timestamp, origin = "1970-01-01")) %>% 
+  mutate(weekday = wday(datetime)) %>% 
   select(-timestamp) %>% 
   # define NA values
   mutate(steps = ifelse(steps <= 0, NA, steps)) %>% 
@@ -30,6 +33,7 @@ activity_clean <-
                              NA, heart_rate)) %>%
   # filter out rows without data
   filter(!is.na(steps) | !is.na(heart_rate))
+
 
 # DISTRIBUTIONS ----
 # histogram of individual heart rate measurements
@@ -47,7 +51,7 @@ activity_clean %>%
   theme_bw()
 
 
-# AGGREGATED TIME SERIES ----
+# TIME SERIES PER DAY ----
 # aggregate time intervals
 activity_agg <-
   activity_clean %>% 
@@ -62,4 +66,18 @@ activity_agg %>%
   ggplot(data = ., aes(x = date, y = value)) +
   geom_line() +
   facet_grid(measurement ~ ., scales = "free_y") +
+  theme_bw()
+
+
+# COMPARING WEEKDAYS ----
+activity_agg %>%
+  mutate(weekday = wday(date)) %>% 
+  ggplot(data = ., aes(x = weekday, y = heart_rate_median)) +
+  geom_boxplot(aes(group = weekday)) +
+  theme_bw()
+
+activity_agg %>%
+  mutate(weekday = wday(date)) %>% 
+  ggplot(data = ., aes(x = weekday, y = steps_sum)) +
+  geom_boxplot(aes(group = weekday)) +
   theme_bw()
